@@ -2,9 +2,11 @@ package TeamNest.management.service;
 
 import TeamNest.management.dao.WorkerDAO;
 import TeamNest.management.model.Worker;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class WorkerServiceImple implements WorkerService{
 
     private final WorkerDAO workerDAO;
@@ -14,7 +16,7 @@ public class WorkerServiceImple implements WorkerService{
     }
 
     @Override
-    public Worker getWorker(String dni) {
+    public Worker getWorker(String dni) throws Exception {
         return workerDAO.getWorker(dni);
     }
 
