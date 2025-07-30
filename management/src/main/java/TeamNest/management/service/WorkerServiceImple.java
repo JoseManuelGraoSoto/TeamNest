@@ -5,7 +5,10 @@ import TeamNest.management.model.Worker;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+/*
+La anotación @Service le dice a Spring:
+    "Esta clase es un componente de lógica de negocio. Por favor, gestionala automáticamente (como un bean)."
+ */
 @Service
 public class WorkerServiceImple implements WorkerService{
 

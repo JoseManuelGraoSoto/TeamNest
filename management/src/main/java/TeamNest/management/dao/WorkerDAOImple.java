@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.List;
 
+/*
+@Repository indica a Spring que esta clase forma parte de la capa de
+acceso a datos, y permite que se manejen automáticamente excepciones como SQLException.
+ */
 @Repository
 public class WorkerDAOImple implements WorkerDAO {
 
