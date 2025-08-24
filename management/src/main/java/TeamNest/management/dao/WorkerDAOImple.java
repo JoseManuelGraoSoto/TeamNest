@@ -7,6 +7,7 @@ import TeamNest.management.model.Worker;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -38,53 +39,55 @@ public class WorkerDAOImple implements WorkerDAO {
 
     }
 
-    @Override
-    public Worker getWorker(String dni) throws Exception {
-        WorkerBaseInfo base = getWorkerBaseInfo(dni);
-        if(base == null) return null;
-        return switch(base.type()){
+    private Worker mapWorker(WorkerBaseInfo workerBase) throws Exception {
+        if(workerBase == null) return null;
+        return switch(workerBase.type()){
             case "player" -> fetchExtendedWorker(
                     "SELECT age, marketValue, conditionToPlay FROM player WHERE dni =?",
-                    dni,
-                    base,
+                    workerBase.dni(),
+                    workerBase,
                     (rs, b) -> new Player(b.dni(), b.name(), b.phoneNumber(),
                             rs.getInt("age"), rs.getLong("marketValue"), rs.getBoolean("conditionToPlay"))
             );
             case "assistant" -> fetchExtendedWorker(
                     "SELECT job, speciality FROM assistant WHERE dni =?",
-                    dni,
-                    base,
+                    workerBase.dni(),
+                    workerBase,
                     (rs, b) -> new Assistant(b.dni(), b.name(), b.phoneNumber(),
                             rs.getString("job"), rs.getString("speciality"))
             );
             case "executive" -> fetchExtendedWorker(
                     "SELECT job FROM executive WHERE dni =?",
-                    dni,
-                    base,
+                    workerBase.dni(),
+                    workerBase,
                     (rs, b) -> new Executive(b.dni(), b.name(), b.phoneNumber(),
                             rs.getString("job"))
             );
-            default -> throw new Exception("Tipo desconocido: " + base.type());
+            default -> throw new Exception("Tipo desconocido: " + workerBase.type());
         };
     }
 
-    private WorkerBaseInfo getWorkerBaseInfo(String dni) {
-        String sql = "SELECT name, phoneNumber, type FROM worker WHERE dni=?";
+    @Override
+    public Worker getWorker(String dni) {
+        String sql = "SELECT dni, name, phoneNumber, type FROM worker WHERE dni=?";
         try(Connection conn = getConnection()){
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, dni);
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 System.out.println(rs.getString("name") + " " + rs.getString("phoneNumber") + " " + rs.getString("type"));
-                return new WorkerBaseInfo(
-                    dni,
+                WorkerBaseInfo workerBase = new WorkerBaseInfo(
+                    rs.getString("dni"),
                     rs.getString("name"),
                     rs.getString("phoneNumber"),
                     rs.getString("type")
                 );
+                return mapWorker(workerBase);
             }
         }catch(SQLException e){
             System.out.println(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
@@ -108,6 +111,25 @@ public class WorkerDAOImple implements WorkerDAO {
 
     @Override
     public List<Worker> getAllWorkers() {
-        return List.of();
+        List<Worker> workers = new ArrayList<>();
+
+        String sql = "SELECT dni, name, phoneNumber, type FROM worker";
+        try(Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                System.out.println(rs.getString("name") + " " + rs.getString("phoneNumber") + " " + rs.getString("type"));
+                WorkerBaseInfo workerB = new WorkerBaseInfo(
+                        rs.getString("dni"),
+                        rs.getString("name"),
+                        rs.getString("phoneNumber"),
+                        rs.getString("type")
+                );
+                workers.add(mapWorker(workerB));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return workers;
     }
 }

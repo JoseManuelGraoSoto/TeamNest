@@ -29,4 +29,5 @@ class WorkerDAOImpleTest {
         Assertions.assertEquals("DNI2001", player.getDni());
         Assertions.assertEquals("Jude Bellingham", player.getName());
     }
+
 }

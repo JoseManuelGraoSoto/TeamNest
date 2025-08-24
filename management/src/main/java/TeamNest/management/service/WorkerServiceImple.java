@@ -24,7 +24,7 @@ public class WorkerServiceImple implements WorkerService{
     }
 
     @Override
-    public List<Worker> getWorkers() {
+    public List<Worker> getAllWorkers() {
         return workerDAO.getAllWorkers();
     }
 

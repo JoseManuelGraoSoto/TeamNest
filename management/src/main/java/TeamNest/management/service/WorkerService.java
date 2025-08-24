@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface WorkerService {
     public Worker getWorker(String dni) throws Exception;
-    public List<Worker> getWorkers();
+    public List<Worker> getAllWorkers();
     public void removeWorker(String dni);
     public void addWorker(Worker worker);
     public void updateWorker(Worker worker);
