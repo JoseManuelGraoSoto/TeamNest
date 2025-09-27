@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
 @Repository indica a Spring que esta clase forma parte de la capa de
@@ -25,8 +27,66 @@ public class WorkerDAOImple implements WorkerDAO {
         return DriverManager.getConnection(url, user, password);
     }
 
+    /*
+        Map that will contain the lambda expressions that we will need to insert specific information in the workers
+     */
+    private final Map<Class<? extends Worker>, WorkerInserter<? extends Worker>> insertStatements =
+            //Map.of() static method that creates an inmutable Map
+            Map.of(
+                    Player.class, (WorkerInserter<Player>) (conn, p) -> {
+                        String sql = "INSERT INTO player (dni, age, marketValue, conditionToPlay) VALUES (?, ?, ?, ?)";
+                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                            ps.setString(1, p.getDni());
+                            ps.setInt(2, p.getAge());
+                            ps.setDouble(3, p.getMarketValue());
+                            ps.setBoolean(4, p.getConditionToPlay());
+                            ps.executeUpdate();
+                        }
+                    },
+                    Assistant.class, (WorkerInserter<Assistant>) (conn, a) -> {
+                        String sql = "INSERT INTO assistant (dni, job, speciality) VALUES (?, ?, ?)";
+                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                            ps.setString(1, a.getDni());
+                            ps.setString(2, a.getJob());
+                            ps.setString(3, a.getSpeciality());
+                            ps.executeUpdate();
+                        }
+                    },
+                    Executive.class, (WorkerInserter<Executive>) (conn, e) -> {
+                        String sql = "INSERT INTO executive (dni, job) VALUES (?, ?)";
+                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                            ps.setString(1, e.getDni());
+                            ps.setString(2, e.getJob());
+                            ps.executeUpdate();
+                        }
+                    }
+            );
+
     @Override
     public void insertWorker(Worker worker) {
+        String sql = "INSERT INTO worker (dni, name, phoneNumber, type) VALUES (?, ?, ?, ?)";
+        try(Connection conn = getConnection()){
+            conn.setAutoCommit(false); // Start transaction with the DB
+            try(PreparedStatement psBase = conn.prepareStatement(sql)){
+                psBase.setString(1, worker.getDni());
+                psBase.setString(2, worker.getName());
+                psBase.setString(3, worker.getPhoneNumber());
+                psBase.setString(4, worker.getClass().getSimpleName().toLowerCase());
+                psBase.executeUpdate();
+            }
+
+            @SuppressWarnings("unchecked")
+            WorkerInserter<Worker> inserter = (WorkerInserter<Worker>)insertStatements.get(worker.getClass());
+
+            if(inserter != null) {
+                inserter.insert(conn, worker);
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

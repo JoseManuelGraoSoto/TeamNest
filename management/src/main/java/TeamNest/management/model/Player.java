@@ -16,4 +16,8 @@ public class Player extends Worker{
         this.marketValue = marketValue;
         this.conditionToPlay = conditionToPlay;
     }
+
+    public boolean getConditionToPlay(){
+        return conditionToPlay;
+    }
 }

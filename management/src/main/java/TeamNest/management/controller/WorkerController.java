@@ -2,6 +2,7 @@ package TeamNest.management.controller;
 
 import TeamNest.management.model.Worker;
 import TeamNest.management.service.WorkerService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +24,18 @@ public class WorkerController {
     }
 
     @GetMapping("/getAllWorkers")
-    public List<Worker> getWorkerByDni() throws Exception {
+    public List<Worker> getAllWorkers() throws Exception {
         return workerService.getAllWorkers();
     }
+
+    @PostMapping
+    public ResponseEntity<String> createWorker(@RequestBody Worker worker) {
+        try {
+            workerService.insertWorker(worker);
+            return ResponseEntity.ok("Worker creado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al crear worker: " + e.getMessage());
+        }
+    }
+
 }

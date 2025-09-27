@@ -3,6 +3,7 @@ package TeamNest.management.service;
 import TeamNest.management.dao.WorkerDAO;
 import TeamNest.management.model.Worker;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 /*
@@ -34,7 +35,7 @@ public class WorkerServiceImple implements WorkerService{
     }
 
     @Override
-    public void addWorker(Worker worker) {
+    public void insertWorker(Worker worker) {
         workerDAO.insertWorker(worker);
     }
 
