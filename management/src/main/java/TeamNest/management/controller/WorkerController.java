@@ -28,6 +28,7 @@ public class WorkerController {
         return workerService.getAllWorkers();
     }
 
+    
     @PostMapping
     public ResponseEntity<String> createWorker(@RequestBody Worker worker) {
         try {

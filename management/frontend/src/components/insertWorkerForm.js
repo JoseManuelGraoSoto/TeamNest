@@ -11,15 +11,26 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
   const [extraFields, setExtraFields] = useState({});
 
   const handleCreate = () => {
+    if (!newWorker.dni || !newWorker.name) {
+      alert("DNI y Name son obligatorios");
+      return;
+    }
+
     const workerData = { ...newWorker, ...extraFields };
+
+    console.log("Enviando worker:", workerData);
+
     createWorker(workerData)
       .then(() => {
-        alert("Worker creado con éxito");
+        alert("Worker creado con éxito ✅");
         setNewWorker({ dni: "", name: "", phoneNumber: "", type: "player" });
         setExtraFields({});
-        if (onWorkerCreated) onWorkerCreated(); // para refrescar la lista
+        if (onWorkerCreated) onWorkerCreated(); // refrescar lista de workers
       })
-      .catch(() => alert("Error al crear worker"));
+      .catch((err) => {
+        console.error("Error creando worker:", err);
+        alert("❌ Error al crear worker");
+      });
   };
 
   const renderExtraFields = () => {
@@ -31,14 +42,22 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
               type="number"
               placeholder="Age"
               value={extraFields.age || ""}
-              onChange={(e) => setExtraFields({ ...extraFields, age: e.target.value })}
+              onChange={(e) =>
+                setExtraFields({
+                  ...extraFields,
+                  age: parseInt(e.target.value, 10) || 0,
+                })
+              }
             />
             <input
               type="number"
               placeholder="Market Value"
               value={extraFields.marketValue || ""}
               onChange={(e) =>
-                setExtraFields({ ...extraFields, marketValue: e.target.value })
+                setExtraFields({
+                  ...extraFields,
+                  marketValue: parseFloat(e.target.value) || 0,
+                })
               }
             />
             <label>
@@ -46,7 +65,10 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
                 type="checkbox"
                 checked={extraFields.conditionToPlay || false}
                 onChange={(e) =>
-                  setExtraFields({ ...extraFields, conditionToPlay: e.target.checked })
+                  setExtraFields({
+                    ...extraFields,
+                    conditionToPlay: e.target.checked,
+                  })
                 }
               />
               Condition to Play
@@ -60,13 +82,17 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
               type="text"
               placeholder="Job"
               value={extraFields.job || ""}
-              onChange={(e) => setExtraFields({ ...extraFields, job: e.target.value })}
+              onChange={(e) =>
+                setExtraFields({ ...extraFields, job: e.target.value })
+              }
             />
             <input
               type="text"
               placeholder="Speciality"
               value={extraFields.speciality || ""}
-              onChange={(e) => setExtraFields({ ...extraFields, speciality: e.target.value })}
+              onChange={(e) =>
+                setExtraFields({ ...extraFields, speciality: e.target.value })
+              }
             />
           </>
         );
@@ -76,7 +102,9 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
             type="text"
             placeholder="Job"
             value={extraFields.job || ""}
-            onChange={(e) => setExtraFields({ ...extraFields, job: e.target.value })}
+            onChange={(e) =>
+              setExtraFields({ ...extraFields, job: e.target.value })
+            }
           />
         );
       default:
@@ -85,39 +113,51 @@ export default function InsertWorkerForm({ onWorkerCreated }) {
   };
 
   return (
-    <div>
+    <div style={{ marginTop: "2rem" }}>
       <h3>Crear nuevo worker:</h3>
-      <input
-        type="text"
-        placeholder="DNI"
-        value={newWorker.dni}
-        onChange={(e) => setNewWorker({ ...newWorker, dni: e.target.value })}
-      />
-      <input
-        type="text"
-        placeholder="Name"
-        value={newWorker.name}
-        onChange={(e) => setNewWorker({ ...newWorker, name: e.target.value })}
-      />
-      <input
-        type="text"
-        placeholder="Phone"
-        value={newWorker.phoneNumber}
-        onChange={(e) => setNewWorker({ ...newWorker, phoneNumber: e.target.value })}
-      />
-      <select
-        value={newWorker.type}
-        onChange={(e) => {
-          setNewWorker({ ...newWorker, type: e.target.value });
-          setExtraFields({});
-        }}
-      >
-        <option value="player">Player</option>
-        <option value="assistant">Assistant</option>
-        <option value="executive">Executive</option>
-      </select>
-      {renderExtraFields()}
-      <button onClick={handleCreate}>Crear</button>
+
+      <div>
+        <input
+          type="text"
+          placeholder="DNI"
+          value={newWorker.dni}
+          onChange={(e) => setNewWorker({ ...newWorker, dni: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Name"
+          value={newWorker.name}
+          onChange={(e) => setNewWorker({ ...newWorker, name: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Phone"
+          value={newWorker.phoneNumber}
+          onChange={(e) =>
+            setNewWorker({ ...newWorker, phoneNumber: e.target.value })
+          }
+        />
+        <select
+          value={newWorker.type}
+          onChange={(e) => {
+            setNewWorker({ ...newWorker, type: e.target.value });
+            setExtraFields({});
+          }}
+        >
+          <option value="player">Player</option>
+          <option value="assistant">Assistant</option>
+          <option value="executive">Executive</option>
+        </select>
+      </div>
+
+      <div style={{ marginTop: "1rem" }}>
+        <h4>Datos específicos ({newWorker.type}):</h4>
+        {renderExtraFields()}
+      </div>
+
+      <button style={{ marginTop: "1rem" }} onClick={handleCreate}>
+        Crear
+      </button>
     </div>
   );
 }

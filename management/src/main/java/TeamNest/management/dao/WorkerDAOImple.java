@@ -35,7 +35,7 @@ public class WorkerDAOImple implements WorkerDAO {
             Map.of(
                     Player.class, (WorkerInserter<Player>) (conn, p) -> {
                         String sql = "INSERT INTO player (dni, age, marketValue, conditionToPlay) VALUES (?, ?, ?, ?)";
-                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
                             ps.setString(1, p.getDni());
                             ps.setInt(2, p.getAge());
                             ps.setDouble(3, p.getMarketValue());
@@ -45,7 +45,7 @@ public class WorkerDAOImple implements WorkerDAO {
                     },
                     Assistant.class, (WorkerInserter<Assistant>) (conn, a) -> {
                         String sql = "INSERT INTO assistant (dni, job, speciality) VALUES (?, ?, ?)";
-                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
                             ps.setString(1, a.getDni());
                             ps.setString(2, a.getJob());
                             ps.setString(3, a.getSpeciality());
@@ -54,7 +54,7 @@ public class WorkerDAOImple implements WorkerDAO {
                     },
                     Executive.class, (WorkerInserter<Executive>) (conn, e) -> {
                         String sql = "INSERT INTO executive (dni, job) VALUES (?, ?)";
-                        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
                             ps.setString(1, e.getDni());
                             ps.setString(2, e.getJob());
                             ps.executeUpdate();
