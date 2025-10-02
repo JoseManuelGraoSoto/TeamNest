@@ -93,12 +93,12 @@ A full-stack Java-based application to manage football team personnel, integrate
 
 ## **Tech Stack**
 
-- **Backend:** Java (Spring Boot), JPA/Hibernate, RESTful APIs.
-- **Frontend:** React, Axios, Material-UI (or preferred component library).
+- **Backend:** Java (Spring Boot), RESTful APIs.
+- **Frontend:** React, JavaScript, CSS, HTML
 - **Database:** MySQL, relational modeling.
-- **Testing:** JUnit, Selenium, Cucumber.
+- **Testing:** JUnit, DBUnit, Selenium, Cucumber.
 - **Security:** JWT or Spring Security for role-based access.
-- **DevOps:** Docker, Docker Compose, Kubernetes (optional).
+- **DevOps:** Docker, Kubernetes.
 
 ---
 
