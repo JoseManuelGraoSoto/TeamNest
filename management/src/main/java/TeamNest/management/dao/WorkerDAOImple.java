@@ -22,6 +22,8 @@ public class WorkerDAOImple implements WorkerDAO {
     private final String url = System.getenv("DB_URL");
     private final String user = System.getenv("DB_USER");
     private final String password = System.getenv("DB_PASSWORD");
+    private static final String UPDATE_WORKER_SQL =
+            "UPDATE worker SET name=?, phoneNumber=? WHERE dni=?";
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, user, password);
@@ -91,14 +93,73 @@ public class WorkerDAOImple implements WorkerDAO {
 
     @Override
     public void updateWorker(Worker worker) {
-
+        try(Connection conn = getConnection()){
+            conn.setAutoCommit(false); // Start transaction with the DB
+            try(PreparedStatement pbBase = conn.prepareStatement(UPDATE_WORKER_SQL)){
+                pbBase.setString(1, worker.getName());
+                pbBase.setString(2, worker.getPhoneNumber());
+                pbBase.setString(3, worker.getDni());
+                int updated = pbBase.executeUpdate();
+                if (updated == 0) {
+                    throw new RuntimeException("Worker not found: " + worker.getDni());
+                }
+                @SuppressWarnings("unchecked")
+                WorkerUpdater<Worker> updater = (WorkerUpdater<Worker>) updateStatements.get(worker.getClass());
+                if (updater != null) {
+                    updater.update(conn, worker);
+                }
+                conn.commit();
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    /*
+        Map that will contain the lambda expressions that we will need to update specific information in the workers
+     */
+    private final Map<Class<? extends Worker>, WorkerUpdater<? extends Worker>> updateStatements =
+            //Map.of() static method that creates an inmutable Map
+            Map.of(
+                    Player.class, (WorkerUpdater<Player>) (conn, p) -> {
+                        String sql = "UPDATE player SET age=?, marketValue=?, conditionToPlay=? WHERE dni=?";
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                            ps.setString(1, p.getDni());
+                            ps.setInt(2, p.getAge());
+                            ps.setDouble(3, p.getMarketValue());
+                            ps.setBoolean(4, p.getConditionToPlay());
+                            ps.executeUpdate();
+                        }
+                    },
+                    Assistant.class, (WorkerUpdater<Assistant>) (conn, a) -> {
+                        String sql = "UPDATE assistant SET job=?, speciality=? WHERE dni=?";
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                            ps.setString(1, a.getDni());
+                            ps.setString(2, a.getJob());
+                            ps.setString(3, a.getSpeciality());
+                            ps.executeUpdate();
+                        }
+                    },
+                    Executive.class, (WorkerUpdater<Executive>) (conn, e) -> {
+                        String sql = "UPDATE executive SET job=? WHERE dni=?";
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                            ps.setString(1, e.getDni());
+                            ps.setString(2, e.getJob());
+                            ps.executeUpdate();
+                        }
+                    }
+            );
+
 
     @Override
     public void deleteWorker(String dni) {
 
     }
 
+    /*
+        Map function that will determinate from which  table we need to get the information for specific type of worker
+     */
     private Worker mapWorker(WorkerBaseInfo workerBase) throws Exception {
         if(workerBase == null) return null;
         return switch(workerBase.type()){

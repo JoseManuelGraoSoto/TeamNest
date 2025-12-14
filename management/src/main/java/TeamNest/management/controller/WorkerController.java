@@ -39,4 +39,14 @@ public class WorkerController {
         }
     }
 
+    @PutMapping
+    public ResponseEntity<String> updateWorker(@RequestBody Worker worker) {
+        try {
+            workerService.updateWorker(worker);
+            return ResponseEntity.ok("Worker actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al crear worker: " + e.getMessage());
+        }
+    }
+
 }
